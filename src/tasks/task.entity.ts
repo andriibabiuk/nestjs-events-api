@@ -5,12 +5,23 @@ import { TaskStatus } from './task.model';
 export class Task {
   @PrimaryGeneratedColumn('uuid')
   id: string;
-  @Column()
+  @Column({
+    type: 'varchar',
+    length: 100,
+    nullable: false,
+  })
   title: string;
 
-  @Column()
+  @Column({
+    type: 'text',
+    nullable: false,
+  })
   description: string;
 
-  @Column()
+  @Column({
+    type: 'enum',
+    enum: TaskStatus,
+    default: TaskStatus.OPEN,
+  })
   status: TaskStatus;
 }
