@@ -1,0 +1,66 @@
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  NotFoundException,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
+import { CreateTaskDto } from './create-task.dto';
+import { WrongTaskStatusException } from './exceptions/wrong-task-status.exception';
+import { FindOneParams } from './find-one.params';
+import type { ITask } from './task.model';
+import { TasksService } from './tasks.service';
+import { UpdateTaskDto } from './update-task.dto';
+
+@Controller('tasks')
+export class TasksController {
+  constructor(private readonly tasksService: TasksService) {}
+
+  @Get()
+  public findAll(): ITask[] {
+    return this.tasksService.findAll();
+  }
+  @Get('/:id')
+  public findOne(@Param() params: FindOneParams): ITask {
+    return this.findOneOrFail(params.id);
+  }
+  @Post()
+  public create(@Body() createTaskDto: CreateTaskDto) {
+    return this.tasksService.create(createTaskDto);
+  }
+  @Patch('/:id')
+  public updateTask(
+    @Param() params: FindOneParams,
+    @Body() updateTaskDto: UpdateTaskDto,
+  ): ITask {
+    const task = this.findOneOrFail(params.id);
+    try {
+      return this.tasksService.updateTask(task, updateTaskDto);
+    } catch (error) {
+      if (error instanceof WrongTaskStatusException) {
+        throw new BadRequestException([error.message]);
+      }
+      throw error;
+    }
+  }
+  @Delete('/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  public deleteTask(@Param() params: FindOneParams): void {
+    const task = this.findOneOrFail(params.id);
+    this.tasksService.deleteTask(task);
+  }
+
+  private findOneOrFail(id: string): ITask {
+    const task = this.tasksService.findOne(id);
+    if (!task) {
+      throw new NotFoundException();
+    }
+    return task;
+  }
+}

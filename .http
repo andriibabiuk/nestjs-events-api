@@ -1,0 +1,42 @@
+@baseUrl = http://127.0.0.1:3000
+@contentType = application/json
+
+### The basic request
+GET {{{baseUrl}}
+
+### Get all tasks
+GET {{baseUrl}}/tasks
+
+### Get a single task
+GET {{baseUrl}}/tasks/{{taskId}}
+
+### Create a new task
+# @name createTask
+POST {{baseUrl}}/tasks
+Content-Type: {{contentType}}
+
+{
+	"title": "Learn NestJs",
+	"description": "Complete the NestJs course",
+	"status": "DONE"
+}
+
+### Set the task id
+@taskId = {{ createTask.response.body.id}}
+
+
+
+### Update a task
+PUT {{baseUrl}}/tasks/
+
+### Update a task
+PATCH {{baseUrl}}/tasks/{{taskId}}
+Content-Type: {{contentType}}
+
+{
+	"status": "OPEN"
+}
+
+
+### Delete a task
+DELETE {{baseUrl}}/tasks/{{taskId}}
