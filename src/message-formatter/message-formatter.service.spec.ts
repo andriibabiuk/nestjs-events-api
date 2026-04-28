@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { MessageFormatterService } from './message-formater.service';
+import { MessageFormatterService } from './message-formatter.service';
 
 describe('MessageFormaterService', () => {
   let service: MessageFormatterService;
