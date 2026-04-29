@@ -11,6 +11,7 @@ import { LoggerService } from './logger/logger.service';
 import { MessageFormatterService } from './message-formatter/message-formatter.service';
 import { Task } from './tasks/task.entity';
 import { TasksModule } from './tasks/tasks.module';
+import { User } from './users/user.entity';
 
 @Module({
   imports: [
@@ -26,7 +27,7 @@ import { TasksModule } from './tasks/tasks.module';
       inject: [ConfigService],
       useFactory: async (configService: TypedConfigService) => ({
         ...(await configService.get('database'))!,
-        entities: [Task],
+        entities: [Task, User],
         synchronize: true,
       }),
     }),
