@@ -6,6 +6,9 @@ import { AuthConfig } from 'src/config/auth.config';
 import { TypedConfigService } from 'src/config/typed-config.service';
 import { User } from './user.entity';
 import { PasswordService } from './password/password.service';
+import { UserService } from './user/user.service';
+import { AuthService } from './auth/auth.service';
+import { AuthController } from './auth/auth.controller';
 
 @Module({
   imports: [
@@ -21,6 +24,7 @@ import { PasswordService } from './password/password.service';
       }),
     }),
   ],
-  providers: [PasswordService],
+  providers: [PasswordService, UserService, AuthService],
+  controllers: [AuthController],
 })
 export class UsersModule {}
