@@ -23,14 +23,31 @@ export class TasksService {
     filters: FindTaskParams,
     pagination: PaginationParams,
   ): Promise<[Task[], number]> {
-    return await this.tasksRepository.findAndCount({
-      where: {
-        status: filters.status,
-      },
-      relations: ['labels'],
-      skip: pagination.offset,
-      take: pagination.limit,
-    });
+    const query = this.tasksRepository
+      .createQueryBuilder('task')
+      .leftJoinAndSelect('task.labels', 'labels');
+    if (filters.status) {
+      query.andWhere('task.status = :status', { status: filters.status });
+    }
+    if (filters.search?.trim()) {
+      query.andWhere(
+        '(task.title LIKE :search OR task.description LIKE :search)',
+        { search: `%${filters.search}%` },
+      );
+    }
+    if (filters.labels?.length) {
+      const subQuery = query
+        .subQuery()
+        .select('labels.taskId')
+        .from('task_label', 'labels')
+        .where('labels.name IN (:...names)', { names: filters.labels })
+        .getQuery();
+      query.andWhere(`task.id IN ${subQuery}`);
+      // query.andWhere('labels.name IN (:...names)', { names: filters.labels });
+    }
+    query.orderBy(`task.${filters.sortBy}`, filters.sortDirection);
+    query.skip(pagination.offset).take(pagination.limit);
+    return await query.getManyAndCount();
   }
 
   public async findOne(id: string): Promise<Task | null> {
