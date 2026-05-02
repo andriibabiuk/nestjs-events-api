@@ -1,0 +1,85 @@
+import { Server } from 'http';
+import request from 'supertest';
+import { AppModule } from './../src/app.module';
+import { TestSetup } from './utils/test-setup';
+
+describe('AppController (e2e)', () => {
+  let testSetup: TestSetup;
+  beforeEach(async () => {
+    testSetup = await TestSetup.create(AppModule);
+  });
+  afterEach(async () => {
+    await testSetup?.cleanup();
+  });
+  afterAll(async () => {
+    await testSetup?.teardown();
+  });
+  const testUser = {
+    email: 'test@example.com',
+    name: 'test',
+    password: 'test1234A$',
+  };
+  it('/auth/register (POST)', () => {
+    return request(testSetup.app.getHttpServer() as Server)
+      .post('/auth/register')
+      .send(testUser)
+      .expect(201)
+      .expect((res) => {
+        const body = res.body as { email: string; name: string };
+        expect(body.email).toBe(testUser.email);
+        expect(body.name).toBe(testUser.name);
+        expect(body).not.toHaveProperty('password');
+      });
+  });
+  it('/auth/register (POST) - duplicate email', async () => {
+    await request(testSetup.app.getHttpServer() as Server)
+      .post('/auth/register')
+      .send(testUser);
+    return await request(testSetup.app.getHttpServer() as Server)
+      .post('/auth/register')
+      .send(testUser)
+      .expect(409);
+  });
+  it('/auth/login (POST)', async () => {
+    await request(testSetup.app.getHttpServer() as Server)
+      .post('/auth/register')
+      .send(testUser);
+    const response = await request(testSetup.app.getHttpServer() as Server)
+      .post('/auth/login')
+      .send({ email: testUser.email, password: testUser.password });
+    expect(response.status).toBe(201);
+    const body = response.body as { accessToken: string };
+    expect(body.accessToken).toBeDefined();
+  });
+  it('/auth/profile (POST)', async () => {
+    await request(testSetup.app.getHttpServer() as Server)
+      .post('/auth/register')
+      .send(testUser);
+    const response = await request(testSetup.app.getHttpServer() as Server)
+      .post('/auth/login')
+      .send({ email: testUser.email, password: testUser.password });
+    const token = (response.body as { accessToken: string }).accessToken;
+    return await request(testSetup.app.getHttpServer() as Server)
+      .get('/auth/profile')
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200)
+      .expect((res) => {
+        const body = res.body as { email: string; name: string };
+        expect(body.email).toBe(testUser.email);
+        expect(body.name).toBe(testUser.name);
+        expect(body).not.toHaveProperty('password');
+      });
+  });
+  it('/auth/profile (POST) - failed incorrect token', async () => {
+    await request(testSetup.app.getHttpServer() as Server)
+      .post('/auth/register')
+      .send(testUser);
+    await request(testSetup.app.getHttpServer() as Server)
+      .post('/auth/login')
+      .send({ email: testUser.email, password: testUser.password });
+    return await request(testSetup.app.getHttpServer() as Server)
+      .get('/auth/profile')
+      .set('Authorization', `Bearer invalid_token`)
+      .expect(401);
+  });
+});

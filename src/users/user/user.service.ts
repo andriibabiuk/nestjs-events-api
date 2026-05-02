@@ -19,10 +19,11 @@ export class UserService {
     const hashedPassword = await this.passwordService.hash(
       createUserDto.password,
     );
-    return await this.usersRepository.save({
+    const user = this.usersRepository.create({
       ...createUserDto,
       password: hashedPassword,
     });
+    return await this.usersRepository.save(user);
   }
   public async findOne(id: string): Promise<User | null> {
     return await this.usersRepository.findOne({ where: { id } });
