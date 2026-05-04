@@ -11,5 +11,8 @@ export const typeOrmConfig = registerAs(
     password: process.env.DB_PASSWORD ?? 'postgres',
     database: process.env.DB_NAME ?? 'tasks',
     synchronize: Boolean(process.env.DB_SYNCHRONIZE ?? false),
+    ssl: {
+      rejectUnauthorized: false,
+    },
   }),
 );

@@ -53,7 +53,17 @@ Strict DTO validation using: - class-validator - class-transformer
 
 ---
 
-## 📦 Installation
+## � Prerequisites
+
+Before you begin, ensure you have met the following requirements:
+
+- **Node.js** (v18 or higher recommended)
+- **pnpm** (installed globally)
+- **Docker** & **Docker Compose**
+
+---
+
+## �📦 Installation
 
 ```bash
 pnpm install
@@ -88,6 +98,17 @@ JWT_EXPIRES_IN=JWT_EXPIRES_IN
 ---
 
 ## 🏃 Running the Application
+
+### Option 1: Docker (Fastest)
+
+The project is containerized for easy deployment.
+
+```bash
+# Build and start all services (API + PostgreSQL)
+docker-compose up --build
+```
+
+### Option 2: Local Development
 
 ### Start PostgreSQL
 
