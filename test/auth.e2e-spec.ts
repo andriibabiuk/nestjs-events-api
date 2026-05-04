@@ -19,6 +19,24 @@ describe('AppController (e2e)', () => {
     name: 'test',
     password: 'test1234A$',
   };
+  it('should require auth', () => {
+    return request(testSetup.app.getHttpServer() as Server)
+      .get('/tasks')
+      .expect(401);
+  });
+  it('should allow public route access', async () => {
+    await request(testSetup.app.getHttpServer() as Server)
+      .post('/auth/register')
+      .send(testUser)
+      .expect(201);
+    await request(testSetup.app.getHttpServer() as Server)
+      .post('/auth/login')
+      .send({
+        email: testUser.email,
+        password: testUser.password,
+      })
+      .expect(201);
+  });
   it('/auth/register (POST)', () => {
     return request(testSetup.app.getHttpServer() as Server)
       .post('/auth/register')
