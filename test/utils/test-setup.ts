@@ -1,4 +1,4 @@
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { DataSource } from 'typeorm';
@@ -32,6 +32,9 @@ export class TestSetup {
       .compile();
 
     this.app = moduleFixture.createNestApplication();
+    this.app.useGlobalPipes(
+      new ValidationPipe({ transform: true, whitelist: true }),
+    );
 
     this.dataSource = moduleFixture.get(DataSource);
 
